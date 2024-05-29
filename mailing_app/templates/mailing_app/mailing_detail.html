@@ -1,0 +1,30 @@
+{% extends 'mailing_app/base.html' %}
+{% block content %}
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">Рассылка</h1>
+
+</div>
+<div class="container">
+    <div class="row text-center">
+        <h5>Номер рассылки.</h5>
+        <p>{{ object.pk }}</p>
+        <h5>Дата первой отправки.</h5>
+        <p>{{ object.datetime }}</p>
+        <h5>Периодичность.</h5>
+        <p>{{ object.periodicity }}</p>
+        <h5>Название сообщения.</h5>
+        <p>{{ object.massage }}</p>
+        <h5>Клиенты рассылки:</h5>
+        <p>{% for customers in object.customers.all %} {{ customers.full_name }} <br> {% endfor %}</p>
+
+        <h4>Отправить рассылку</h4>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+
+
+    </div>
+</div>
+{% endblock %}

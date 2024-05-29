@@ -1,0 +1,20 @@
+{% extends 'mailing_app/base.html' %}
+{% block content %}
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">Клиент</h1>
+
+</div>
+<div class="container">
+    <div class="row text-center">
+
+        <h5>Полное имя.</h5>
+        <p> {{ object.full_name }}</p>
+        <h5>Адрес электронной почты.</h5>
+        <p> {{ object.email }}</p>
+        <h5>Комментарии:</h5>
+        <p>{{ object.comment }}</p>
+
+
+    </div>
+</div>
+{% endblock %}

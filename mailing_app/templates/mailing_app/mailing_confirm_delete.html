@@ -1,0 +1,12 @@
+{% extends 'mailing_app/base.html' %}
+
+{% block content %}
+    <h1>Вы действительно хотите удалить рассылку?</h1>
+    <h2> Под названием: {{ object.massage }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-danger">Удалить</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'mailing_app/base.html' %}
+{% block content %}
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+
+    <h3 class="display-4">Создание рассылки</h3>
+
+
+    <div class="container">
+        <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-success">Создать</button>
+
+                {{ object.title }}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'mailing_app/base.html' %}
+{% block content %}
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">Список рассылок</h1>
+
+</div>
+<div class="container">
+    <div class="row text-center">
+        <h5><a href="{% url 'mailing_app:mailing_create' %}" class="nav-link">Создать рассылку</a></h5>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col"><h5>Номер рассылки</h5></th>
+                <th scope="col"><h5>Дата первой отправки</h5></th>
+                <th scope="col"><h5>Периодичность</h5></th>
+                <th scope="col"><h5>Название сообщения</h5></th>
+                <th scope="col"><h5>Статус рассылки</h5></th>
+                <th scope="col"><h5>Удаление рассылки</h5></th>
+
+            </tr>
+            </thead>
+            <tbody>
+            {% for object in object_list %}
+            <tr>
+                <th scope="row"><a href="{% url 'mailing_app:mailing_detail' pk=object.pk %}">{{ object.pk }}</a></th>
+                <td>{{ object.datetime }}</td>
+                <td>{{ object.periodicity }}</td>
+                <td>{{ object.massage }}</td>
+                <td>{{ status }}</td>
+                <td><a href="{% url 'mailing_app:mailing_delete' pk=object.pk %}">Удалить рассылку</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'mailing_app/base.html' %}
+{% block content %}
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center" xmlns="http://www.w3.org/1999/html">
+    <h1 class="display-4">Список сообщений для рассылки</h1>
+
+</div>
+<div class="container">
+    <h5><a href="{% url 'mailing_app:message_form' %}" class="nav-link">Добавить сообщение</a></h5>
+    <div class="row text-center">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col"><h5>Тема сообщения</h5></th>
+                <th scope="col"><h5>Подробнее</h5></th>
+                <th scope="col"><h5>Редактировать сообщение</h5></th>
+                <th scope="col"><h5>Удалить сообщение</h5></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for object in object_list %}
+            <tr>
+                <th scope="row">{{ object.title }}</th>
+                <td><a href="{% url 'mailing_app:message_detail' pk=object.pk %}">Подробнее</a></td>
+                <td><a href="{% url 'mailing_app:message_update' pk=object.pk %}">Редактировать</a></td>
+                <td><a href="{% url 'mailing_app:message_delete' pk=object.pk %}">Удалить</a></td>
+            </tr>
+
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
