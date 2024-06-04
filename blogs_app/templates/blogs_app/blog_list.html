@@ -1,0 +1,23 @@
+{% extends 'mailing_app/base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+
+{% block content %}
+<a href="{% url 'blogs_app:blog_create' %}" class="nav-link">Создать блог</a>
+{% for blog in object_list %}
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title"><a href="{% url 'blogs_app:blog_detail' pk=blog.pk %}" class="nav-link">{{ blog.title }}</a></h5>
+    <p class="card-text">{{ blog.content }}</p>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+</body>
+</html>

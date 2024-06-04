@@ -10,21 +10,22 @@
         <table class="table">
             <thead>
             <tr>
+                <th scope="col"><h5>Номер</h5></th>
                 <th scope="col"><h5>Тема сообщения</h5></th>
-                <th scope="col"><h5>Подробнее</h5></th>
-                <th scope="col"><h5>Редактировать сообщение</h5></th>
-                <th scope="col"><h5>Удалить сообщение</h5></th>
+                <th scope="col"><h5>Дата создания</h5></th>
+
             </tr>
             </thead>
             <tbody>
             {% for object in object_list %}
+            {% if user.is_authenticated %}
             <tr>
-                <th scope="row">{{ object.title }}</th>
-                <td><a href="{% url 'mailing_app:message_detail' pk=object.pk %}">Подробнее</a></td>
-                <td><a href="{% url 'mailing_app:message_update' pk=object.pk %}">Редактировать</a></td>
-                <td><a href="{% url 'mailing_app:message_delete' pk=object.pk %}">Удалить</a></td>
+                <td>{{ forloop.counter }}</td>
+                <th scope="row"><a class="lead" href="{% url 'mailing_app:message_detail' pk=object.pk %}">
+                    {{ object.title }}</a></th>
+                <td>{{ object.created_at }}</td>
             </tr>
-
+            {% endif %}
             {% endfor %}
             </tbody>
         </table>

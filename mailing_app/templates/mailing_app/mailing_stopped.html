@@ -1,0 +1,25 @@
+{% extends 'mailing_app/base.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mailing Stopped</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Рассылка остановлена</h1>
+        <p>Рассылка с ID {{ mailing.id }} была успешно остановлена.</p>
+        <p><strong>Дата и время первой отправки:</strong> {{ mailing.datetime }}</p>
+        <p><strong>Периодичность:</strong> {{ mailing.periodicity }}</p>
+        <p><strong>Тема письма:</strong> {{ mailing.massage.title }}</p>
+        <p><strong>Пользователь:</strong> {{ mailing.user_mailing.email }}</p>
+        <p><strong>Статус рассылки:</strong> {{ mailing.attempt.latest.attempt_status }}</p>
+        <a href="{% url 'mailing_app:attempts_list' %}">Отчет проведенных рассылок</a>
+    </div>
+</body>
+</html>
+{% endblock %}

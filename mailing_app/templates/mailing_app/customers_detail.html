@@ -13,7 +13,14 @@
         <p> {{ object.email }}</p>
         <h5>Комментарии:</h5>
         <p>{{ object.comment }}</p>
+        <h5>Кто добавил:</h5>
+        <p> {{ object.user_customer }}</p>
+        <h5>Дата создания:</h5>
+        <p> {{ object.date_creation_client }}</p>
 
+        <h5><a href="{% url 'mailing_app:customers_list' %}" class="nav-link">Назад</a></h5>
+        <h5><a href="{% url 'mailing_app:customers_update' pk=object.pk %}" class="nav-link">Редактировать</a></h5>
+        <h5><a href="{% url 'mailing_app:customers_delete' pk=object.pk %}" class="nav-link">Удалить</a></h5>
 
     </div>
 </div>

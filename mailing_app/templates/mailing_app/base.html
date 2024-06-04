@@ -34,21 +34,46 @@
 
         <ul class="nav nav-pills">
 
-            <li class="nav-item"><a href="{% url 'mailing_app:mailing_list' %}" class="nav-link active" aria-current="page">Главная</a></li>
-            <li class="nav-item"><a href="{% url 'mailing_app:message_list' %}" class="nav-link">Список сообщений</a></li>
-<!--            <li class="nav-item"><a href="{% url 'mailing_app:customers_create' %}" class="nav-link">Создать базу клиентов</a></li>-->
-            <li class="nav-item"><a href="{% url 'mailing_app:customers_list' %}" class="nav-link">Список клиентов</a></li>
-<!--            <li class="nav-item"><a href="{% url 'mailing_app:mailing_create' %}" class="nav-link">Настройка рассылки</a></li>-->
-            <li class="nav-item"><a href="{% url 'mailing_app:mailing_list' %}" class="nav-link">Список рассылок</a></li>
-            <li class="nav-item"><a href="#" class="nav-link">Отчет проведенных рассылок</a></li>
+            <li class="nav-item"><a href="{% url 'mailing_app:mailing_list' %}" class="nav-link active"
+                                    aria-current="page">Главная</a></li>
+
+            <li class="nav-item"><a href="{% url 'blogs_app:blog_list' %}" class="nav-link">Блог</a></li>
+
+
+
+
+            <li class="nav-item"><a href="{% url 'mailing_app:message_list' %}" class="nav-link">Список сообщений</a>
+            </li>
+            <li class="nav-item"><a href="{% url 'mailing_app:customers_list' %}" class="nav-link">Список клиентов</a>
+            </li>
+            <li class="nav-item"><a href="{% url 'mailing_app:mailing_list' %}" class="nav-link">Список рассылок</a>
+            </li>
+            <li class="nav-item"><a href="{% url 'mailing_app:attempts_list' %}" class="nav-link">Отчет проведенных
+                рассылок</a></li>
+            {% if user.is_authenticated %}
+            <li class="nav-item"><a href="{% url 'users_app:profile' %}" class="nav-link">Профиль</a></li>
+            <li>
+                <form method="POST" action="{% url 'users_app:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Выход</button>
+                </form>
+            </li>
+            {% else %}
+            <li class="nav-item"><a href="{% url 'users_app:register' %}" class="nav-link">Регистрация</a></li>
+            <li class="nav-item"><a href="{% url 'users_app:login' %}" class="nav-link">Вход</a></li>
+            {% endif %}
+            <nav class="ms-5">
+                <p>{{ user.email }}</p>
+            </nav>
+
         </ul>
     </header>
 </div>
 <div class="container">
     <div class="row text-center">
         {% block content %}
-            {% for object in object_list %}
-            {% endfor %}
+        {% for object in object_list %}
+        {% endfor %}
         {% endblock %}
     </div>
 </div>

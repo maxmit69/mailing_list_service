@@ -14,16 +14,25 @@
         <p>{{ object.periodicity }}</p>
         <h5>Название сообщения.</h5>
         <p>{{ object.massage }}</p>
+        <h5>Статус рассылки.</h5>
+        <p>
+            {% if object.attempt.exists %}
+                    {{ object.attempt.latest.attempt_status }}
+                {% else %}
+                    Нет попыток
+            {% endif %}
+        </p>
         <h5>Клиенты рассылки:</h5>
         <p>{% for customers in object.customers.all %} {{ customers.full_name }} <br> {% endfor %}</p>
-
+        {% if user.is_authenticated %}
+            {% if object.attempt.latest.attempt_status != 'Запущена' %}
         <h4>Отправить рассылку</h4>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Отправить</button>
-        </form>
-
+        <a href="{% url 'mailing_app:start_mailing' object.pk %}">Запустить рассылку</a>
+        {% elif object.attempt.latest.attempt_status == 'Запущена' %}
+        <h4>Остановить рассылку</h4>
+        <a href="{% url 'mailing_app:stop_mailing' object.pk %}">Остановить рассылку</a>
+            {% endif %}
+        {% endif %}
 
     </div>
 </div>

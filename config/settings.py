@@ -38,7 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'blogs_app',
+    'django_crontab',
+    'users_app',
     'mailing_app'
+
 ]
 
 MIDDLEWARE = [
@@ -109,7 +113,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'UTC'
 
@@ -132,3 +136,43 @@ STATICFILES_DIRS = (
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Настройка почты
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'maxmit83@yandex.ru'
+EMAIL_HOST_PASSWORD = 'rmnvbawhkpfbnfew'
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_ADMIN = EMAIL_HOST_USER
+
+LOGIN_URL = 'users_app:login'
+
+
+AUTH_USER_MODEL = 'users_app.User'
+
+# Перенаправляет пользователя после логина
+LOGIN_REDIRECT_URL = 'mailing_app:mailing_list'
+LOGOUT_REDIRECT_URL = 'mailing_app:mailing_list'
+
+# Настройка расписания для запуска команды
+# Команда для запуска: python manage.py crontab add
+# Команда для остановки: python manage.py crontab remove
+# Команда для проверки: python manage.py crontab show
+CRONJOBS = [
+    # Запуск рассылки каждый день в 8:00 утра
+    ('0 8 * * * *', 'django.core.management.call_command', ['send_mailing', '62']),
+
+    # Остановка рассылки каждый день в 18:00 вечера
+    ('0 18 * * *', 'django.core.management.call_command', ['stop_mailing', '62']),
+]
+# Настройка задания для запуска commands
+# Команды для запуска из командной строки: python manage.py send_mailing 'mailing_id'
+# Команды для остановки из командной строки: python manage.py stop_mailing 'mailing_id'

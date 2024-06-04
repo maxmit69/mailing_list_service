@@ -10,6 +10,19 @@
         <p> {{ object.title }}</p>
         <h5>Содержание письма:</h5>
         <p> {{ object.content }}</p>
+        <h5>Автор письма:</h5>
+        <p> {{ object.user_message }}</p>
+        <h5>Клиенты:</h5>
+        {% for customers in object.customers.all %}
+        <p> {{ customers.full_name }}</p>
+        {% endfor %}
+        <h5>Дата создания письма:</h5>
+        <p> {{ object.created_at }}</p>
+
+        <h5><a href="{% url 'mailing_app:message_list' %}" class="nav-link">Назад</a></h5>
+        <h5><a href="{% url 'mailing_app:message_update' pk=object.pk %}" class="nav-link">Редактировать</a></h5>
+        <h5><a href="{% url 'mailing_app:message_delete' pk=object.pk %}" class="nav-link">Удалить</a></h5>
+
     </div>
 </div>
 {% endblock %}

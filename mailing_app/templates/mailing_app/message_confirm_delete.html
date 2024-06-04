@@ -1,11 +1,11 @@
 {% extends 'mailing_app/base.html' %}
 
 {% block content %}
-    <h1>Вы действительно хотите удалить сообщение?</h1>
-    <h5>{{ object.title }}</h5>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-danger">Удалить</button>
-    </form>
+<h1>Вы действительно хотите удалить сообщение?</h1>
+<h5>{{ object.title }}</h5>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-danger">Удалить</button>
+</form>
 {% endblock %}

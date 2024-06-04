@@ -1,0 +1,27 @@
+{% extends 'mailing_app/base.html' %}
+{% load my_custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+{% block content %}
+<h1>Детали блога</h1>
+<p>{{ object.title }}</p>
+<p>{{ object.content }}</p>
+<img class="card-img-top"
+     src="{{ object.image | my_media }}"
+     alt="Card image cap">
+<p>{{ object.date_publication }}</p>
+<p>{{ object.count_views }}</p>
+
+<a href="{% url 'blogs_app:blog_list' %}">Назад</a>
+<a href="{% url 'blogs_app:blog_update' pk=object.pk %}">Редактировать</a>
+<a href="{% url 'blogs_app:blog_delete' pk=object.pk %}">Удалить</a>
+{% endblock %}
+
+</body>
+</html>
