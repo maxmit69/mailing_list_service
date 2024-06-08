@@ -18,14 +18,14 @@
             </thead>
             <tbody>
             {% for object in object_list %}
-            {% if user.is_authenticated %}
+
             <tr>
                 <td>{{ forloop.counter }}</td>
                 <th scope="row"><a class="lead" href="{% url 'mailing_app:message_detail' pk=object.pk %}">
                     {{ object.title }}</a></th>
                 <td>{{ object.created_at }}</td>
             </tr>
-            {% endif %}
+
             {% endfor %}
             </tbody>
         </table>

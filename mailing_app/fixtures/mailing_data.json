@@ -1,0 +1,1 @@
+[{"model": "mailing_app.mailing", "pk": 203, "fields": {"start_time": "2024-06-08T14:42:35Z", "end_time": "2024-06-11T14:42:35Z", "periodicity": "daily", "status": "launched", "massage": 7, "user_mailing": 2, "mailing_is_disabled": false, "customers": [5]}}]

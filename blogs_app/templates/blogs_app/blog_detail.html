@@ -16,11 +16,14 @@
      src="{{ object.image | my_media }}"
      alt="Card image cap">
 <p>{{ object.date_publication }}</p>
-<p>{{ object.count_views }}</p>
+<p>{{ object.count_views }} просмотров</p>
+
 
 <a href="{% url 'blogs_app:blog_list' %}">Назад</a>
+{% if user.is_superuser or user.is_staff %}
 <a href="{% url 'blogs_app:blog_update' pk=object.pk %}">Редактировать</a>
 <a href="{% url 'blogs_app:blog_delete' pk=object.pk %}">Удалить</a>
+{% endif %}
 {% endblock %}
 
 </body>

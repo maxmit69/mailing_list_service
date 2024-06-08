@@ -6,4 +6,5 @@ class MailingAppConfig(AppConfig):
     name = 'mailing_app'
 
     def ready(self):
-        import mailing_app.signals
+        from . import services
+        services.start_scheduler()

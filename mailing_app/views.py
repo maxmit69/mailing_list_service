@@ -1,27 +1,57 @@
 from django.http import HttpResponseForbidden
-from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.views.generic import TemplateView
 from blogs_app.models import Blog
+from config.settings import CACHE_ENABLED
 from mailing_app.forms import MessageForm, MailingForm, CustomersForm
 from mailing_app.models import Customers, Message, Mailing, AttemptSend
-from mailing_app.services import stop_mailing, start_mailing
+from mailing_app.services import send_mailing, schedule_task, schedule_or_send_mailing
+from django.core.cache import cache
 
 
-# Create your views here.
+class HomePageView(TemplateView):
+    """ Главная страница
+    """
+    template_name = 'mailing_app/home.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['blogs_list'] = Blog.objects.order_by('?')[:3]
+        context['mailing_list'] = Mailing.objects.all()
+        mailing_active_count = Mailing.objects.filter(status='launched').count()
+        context['mailing_active_count'] = mailing_active_count  # Количество активных рассылок
+
+        if CACHE_ENABLED:
+            key = f'unique_clients_count'
+            unique_clients_count = cache.get(key)
+
+            if unique_clients_count is None:
+                unique_clients_count = Customers.objects.filter(unique_clients=True).count()
+                cache.set(key, unique_clients_count, 60 * 60 * 24)  # Кэшируем на 24 часа
+
+            context['unique_clients_count'] = unique_clients_count
+        else:
+            unique_clients_count = Customers.objects.filter(unique_clients=True).count()
+            context['unique_clients_count'] = unique_clients_count
+
+        return context
+
+
 class CustomersListView(LoginRequiredMixin, generic.ListView):
     model = Customers
     template_name = 'mailing_app/customers_list.html'
 
     def get_queryset(self):
+        """ Если пользователь не админ, то он может просматривать только своих клиентов
+        """
         if self.request.user.is_superuser:
             return Customers.objects.all()
         return Customers.objects.filter(user_customer=self.request.user)
 
 
-class CustomersDetailView(generic.DetailView):
+class CustomersDetailView(LoginRequiredMixin, generic.DetailView):
     model = Customers
 
 
@@ -44,7 +74,9 @@ class CustomersUpdateView(LoginRequiredMixin, generic.UpdateView):
     success_url = reverse_lazy('mailing_app:customers_list')
 
     def form_valid(self, form):
-        if self.request.user == self.get_object().user_customer:
+        """ Если пользователь владелец клиента или админ, то он может его редактировать
+        """
+        if self.request.user == self.get_object().user_customer or self.request.user.is_superuser:
             return super().form_valid(form)
         else:
             return HttpResponseForbidden(
@@ -57,9 +89,9 @@ class CustomersDeleteView(LoginRequiredMixin, generic.DeleteView):
     success_url = reverse_lazy('mailing_app:customers_list')
 
     def form_valid(self, form):
-        """ Если пользователь владелец клиента, то он может его удалить
+        """ Если пользователь владелец клиента или админ, то он может его удалить
         """
-        if self.request.user == self.get_object().user_customer:
+        if self.request.user == self.get_object().user_customer or self.request.user.is_superuser:
             return super().form_valid(form)
         else:
             return HttpResponseForbidden(
@@ -75,7 +107,7 @@ class MessageListView(LoginRequiredMixin, generic.ListView):
         return Message.objects.filter(user_message=self.request.user)
 
 
-class MessageDetailView(generic.DetailView):
+class MessageDetailView(LoginRequiredMixin, generic.DetailView):
     model = Message
 
 
@@ -96,9 +128,9 @@ class MessageUpdateView(LoginRequiredMixin, generic.UpdateView):
     success_url = reverse_lazy('mailing_app:message_list')
 
     def form_valid(self, form):
-        """ Если пользователь владелец сообщения, то он может его редактировать
+        """ Если пользователь владелец сообщения или админ, то он может его редактировать
         """
-        if self.request.user == self.get_object().user_message:
+        if self.request.user == self.get_object().user_message or self.request.user.is_superuser:
             return super().form_valid(form)
         else:
             return HttpResponseForbidden(
@@ -111,27 +143,33 @@ class MessageDeleteView(LoginRequiredMixin, generic.DeleteView):
     success_url = reverse_lazy('mailing_app:message_list')
 
     def form_valid(self, form):
-        """ Если пользователь владелец сообщения, то он может его удалить
+        """ Если пользователь владелец сообщения или админ, то он может его удалить
         """
-        if self.request.user == self.get_object().user_message:
+        if self.request.user == self.get_object().user_message or self.request.user.is_superuser:
             return super().form_valid(form)
         else:
             return HttpResponseForbidden(
                 f"{self.request.user} не может удалить сообщение пользователя{self.get_object().user_message}")
 
 
-class MailingListView(generic.ListView):
+class MailingListView(LoginRequiredMixin, generic.ListView):
     model = Mailing
     template_name = 'mailing_app/mailing_list.html'
 
+    def get_queryset(self):
+        """ Если пользователь не админ, то он может просматривать только свои рассылки
+        """
+        if self.request.user.is_superuser:
+            return Mailing.objects.all()
+        return Mailing.objects.filter(user_mailing=self.request.user)
+
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['attempts'] = AttemptSend.objects.all()
-        context['blogs'] = Blog.objects.all()
+        context['blogs_list'] = Blog.objects.all()[:3]  # Выводим 3 блога
         return context
 
 
-class MailingDetailView(generic.DetailView):
+class MailingDetailView(LoginRequiredMixin, generic.DetailView):
     model = Mailing
     template_name = 'mailing_app/mailing_detail.html'
 
@@ -142,26 +180,27 @@ class MailingCreateView(LoginRequiredMixin, generic.CreateView):
     template_name = 'mailing_app/mailing_form.html'
     success_url = reverse_lazy('mailing_app:mailing_list')
 
-    def form_valid(self, form):
-        if self.request.user.is_authenticated:
-            form.instance.user_mailing = self.request.user
-        return super().form_valid(form)
-
-
-class MailingUpdateView(LoginRequiredMixin, generic.UpdateView):
-    model = Mailing
-    form_class = MailingForm
-    template_name = 'mailing_app/mailing_form.html'
-    success_url = reverse_lazy('mailing_app:message_form')
-
-    def form_valid(self, form):
-        """ Если пользователь владелец рассылки, то он может ее редактировать
+    def get_form_kwargs(self):
+        """ Вывод в форму только клиентов, созданных текущим пользователем
         """
-        if self.request.user == self.get_object().user_mailing:
-            return super().form_valid(form)
-        else:
-            return HttpResponseForbidden(
-                f"{self.request.user} не может редактировать рассылку пользователя{self.get_object().user_mailing}")
+        kwargs = super(MailingCreateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        """ Сохраняем пользователя, который создал рассылку
+        """
+        mailing = form.save(commit=False)
+        mailing.user_mailing = self.request.user
+        mailing.save()
+
+        # Сохраняем форму
+        response = super().form_valid(form)
+
+        # Вызываем schedule_or_send_mailing для немедленного запуска или планирования задачи
+        schedule_or_send_mailing(mailing)
+
+        return response
 
 
 class MailingDeleteView(LoginRequiredMixin, generic.DeleteView):
@@ -170,37 +209,23 @@ class MailingDeleteView(LoginRequiredMixin, generic.DeleteView):
     success_url = reverse_lazy('mailing_app:mailing_list')
 
     def form_valid(self, form):
-        """ Если пользователь владелец рассылки, то он может ее удалить
+        """ Если пользователь владелец рассылки или админ, то он может ее удалить
         """
-        if self.request.user == self.get_object().user_mailing:
+        if self.request.user == self.get_object().user_mailing or self.request.user.is_superuser:
             return super().form_valid(form)
         else:
             return HttpResponseForbidden(
-                f"{self.request.user} не может удалить рассылку пользователя{self.get_object().user_mailing}")
+                f"{self.request.user} не может удалить рассылку пользователя {self.get_object().user_mailing}")
 
 
-class AttemptSendListView(generic.ListView):
+class AttemptSendListView(LoginRequiredMixin, generic.ListView):
     model = AttemptSend
     template_name = 'mailing_app/attempts_list.html'
+    context_object_name = 'attempt_list'
 
-
-def start_mailing_view(request: object, mailing_id: int) -> object:
-    """ Запуск рассылки
-    :param request: запрос
-    :param mailing_id: идентификатор рассылки
-    :return: статус рассылки
-    """
-    mailing = get_object_or_404(Mailing, pk=mailing_id)
-    start_mailing(mailing)
-    return render(request, 'mailing_app/mailing_started.htm', {'mailing': mailing})
-
-
-def stop_mailing_view(request: object, mailing_id: int) -> object:
-    """ Остановка рассылки
-    :param request: запрос
-    :param mailing_id: идентификатор рассылки
-    :return: статус рассылки
-    """
-    mailing = get_object_or_404(Mailing, pk=mailing_id)
-    stop_mailing(mailing)
-    return render(request, 'mailing_app/mailing_stopped.html', {'mailing': mailing})
+    def get_queryset(self):
+        """ Вывод отчета проведенных рассылок только созданных текущим пользователем если не админ
+        """
+        if self.request.user.is_superuser:
+            return AttemptSend.objects.all()
+        return AttemptSend.objects.filter(user_attempt=self.request.user)

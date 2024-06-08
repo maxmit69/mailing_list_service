@@ -9,8 +9,12 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-o4&p$keex86_-yp(v(j*l@#)3_oxbvc*ctyka^2b^-2xd+xx86'
+SECRET_KEY = os.getenv('MY_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('MY_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = []
 
@@ -38,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django_apscheduler',
     'blogs_app',
     'django_crontab',
     'users_app',
@@ -81,12 +86,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mailing_list_service',
-        'USER': 'postgres',
-        'PASSWORD': 'qwerty',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': os.getenv('MY_ENGINE'),
+        'NAME': os.getenv('MY_NAME'),
+        'USER': os.getenv('MY_USER'),
+        'PASSWORD': os.getenv('MY_PASSWORD'),
+        'HOST': os.getenv('MY_HOST'),
+        'PORT': os.getenv('MY_PORT'),
     }
 }
 
@@ -115,7 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -142,12 +147,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Настройка почты
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.yandex.ru'
-EMAIL_PORT = 465
-EMAIL_HOST_USER = 'maxmit83@yandex.ru'
-EMAIL_HOST_PASSWORD = 'rmnvbawhkpfbnfew'
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
+EMAIL_HOST = os.getenv('MY_MAIL_HOST')
+EMAIL_PORT = os.getenv('MY_EMAIL_PORT')
+EMAIL_HOST_USER = os.getenv('MY_EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('MY_EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.getenv('MY_EMAIL_USE_TLS', 'False') == 'True'
+EMAIL_USE_SSL = os.getenv('MY_EMAIL_USE_SSL', 'False') == 'True'
 
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
@@ -162,17 +167,16 @@ AUTH_USER_MODEL = 'users_app.User'
 LOGIN_REDIRECT_URL = 'mailing_app:mailing_list'
 LOGOUT_REDIRECT_URL = 'mailing_app:mailing_list'
 
-# Настройка расписания для запуска команды
-# Команда для запуска: python manage.py crontab add
-# Команда для остановки: python manage.py crontab remove
-# Команда для проверки: python manage.py crontab show
-CRONJOBS = [
-    # Запуск рассылки каждый день в 8:00 утра
-    ('0 8 * * * *', 'django.core.management.call_command', ['send_mailing', '62']),
+CACHE_MIDDLEWARE_ALIAS = 'default'
+CACHE_MIDDLEWARE_SECONDS = 60
+CACHE_MIDDLEWARE_KEY_PREFIX = 'blogs'
 
-    # Остановка рассылки каждый день в 18:00 вечера
-    ('0 18 * * *', 'django.core.management.call_command', ['stop_mailing', '62']),
-]
-# Настройка задания для запуска commands
-# Команды для запуска из командной строки: python manage.py send_mailing 'mailing_id'
-# Команды для остановки из командной строки: python manage.py stop_mailing 'mailing_id'
+CACHE_ENABLED = True
+
+if CACHE_ENABLED:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': os.getenv('MY_LOCATION'),
+        }
+    }

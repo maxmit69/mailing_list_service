@@ -1,5 +1,4 @@
 from django.contrib import admin
-
 from mailing_app import models
 
 
@@ -14,7 +13,24 @@ class CustomersAdmin(admin.ModelAdmin):
 
 @admin.register(models.Mailing)
 class MailingAdmin(admin.ModelAdmin):
-    list_display = ('id', 'datetime', 'periodicity', 'massage',)
+    list_display = ('id', 'start_time', 'periodicity', 'massage', 'user_mailing',)
+    list_filter = ('start_time', 'periodicity', 'user_mailing',)
+
+    # Если пользователь - manager, то  может редактируем только поле mailing_is_disabled
+    def has_change_permission(self, request, obj=None):
+        if request.user.groups.filter(name='manager').exists() or request.user.is_superuser:
+            return True
+        return obj.mailing_is_disabled
+
+    def get_fields(self, request, obj=None):
+        if request.user.groups.filter(name='manager').exists():
+            return ['mailing_is_disabled']
+        return super().get_fields(request, obj)
+
+    def get_readonly_fields(self, request, obj=None):
+        if request.user.groups.filter(name='manager').exists():
+            return [field.name for field in self.model._meta.fields if field.name != 'mailing_is_disabled']
+        return super().get_readonly_fields(request, obj)
 
 
 @admin.register(models.Message)

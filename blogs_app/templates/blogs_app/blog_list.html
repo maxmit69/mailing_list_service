@@ -8,7 +8,9 @@
 <body>
 
 {% block content %}
+{% if user.is_superuser or user.is_staff %}
 <a href="{% url 'blogs_app:blog_create' %}" class="nav-link">Создать блог</a>
+{% endif %}
 {% for blog in object_list %}
 <div class="card">
   <div class="card-body">
@@ -16,6 +18,7 @@
     <p class="card-text">{{ blog.content }}</p>
   </div>
 </div>
+
 {% endfor %}
 {% endblock %}
 

@@ -1,11 +1,10 @@
 import secrets
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import generic
-
 from config.settings import EMAIL_HOST_USER
 from users_app.forms import UserRegistrationForm, UserProfileForm
 from users_app.models import User
@@ -48,7 +47,7 @@ def activate_user(request, token):
     return redirect(reverse_lazy('users_app:login'))
 
 
-class ProfileView(generic.UpdateView):
+class ProfileView(LoginRequiredMixin, generic.UpdateView):
     model = User
     form_class = UserProfileForm
     success_url = reverse_lazy('users_app:profile')

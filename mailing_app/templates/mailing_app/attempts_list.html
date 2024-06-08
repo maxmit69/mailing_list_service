@@ -12,13 +12,14 @@
                 <th scope="col"><h5>Дата и время последней попытки</h5></th>
                 <th scope="col"><h5>Номер рассылки</h5></th>
                 <th scope="col"><h5>Статус рассылки</h5></th>
+                <th scope="col"><h5>Статус отправки</h5></th>
                 <th scope="col"><h5>Периодичность</h5></th>
-                <th scope="col"><h5>Создатель рассылки</h5></th>
                 <th scope="col"><h5>Ответ почтового сервера</h5></th>
             </tr>
             </thead>
             <tbody>
             {% for object in object_list %}
+
             <tr>
                 <th scope="row">
                     {{ forloop.counter }}
@@ -27,11 +28,26 @@
                     {{ object.last_attempt_time }}
                 </th>
                 <td>{{ object.mailing.pk }}</td>
-                <td>{{ object.attempt_status }}</td>
+                <td>
+                    {% if object.mailing.status == 'created' %}
+                    <h5><span class="badge bg-success">Создана</span></h5>
+                    {% elif object.mailing.status == 'launched' %}
+                    <h5><span class="badge bg-info">Запущена</span></h5>
+                    {% else %}
+                    <h5><span class="badge bg-danger">Завершена</span></h5>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if object.attempt_status == 'success' %}
+                    <h5><span class="badge bg-success">Успешно</span></h5>
+                    {% elif object.attempt_status == 'failed' %}
+                    <h5><span class="badge bg-danger">Неудачно</span></h5>
+                    {% endif %}
+                </td>
                 <td>{{ object.mailing.periodicity }}</td>
-                <td>{{ object.user_attempt }}</td>
                 <td>{{ object.logging }}</td>
             </tr>
+
             {% endfor %}
             </tbody>
         </table>

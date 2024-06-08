@@ -8,31 +8,31 @@
     <div class="row text-center">
         <h5>Номер рассылки.</h5>
         <p>{{ object.pk }}</p>
-        <h5>Дата первой отправки.</h5>
-        <p>{{ object.datetime }}</p>
+        <h5>Дата начала рассылки.</h5>
+        <p>{{ object.start_time }}</p>
+        <h5>Дата окончания рассылки.</h5>
+        <p>{{ object.end_time }}</p>
         <h5>Периодичность.</h5>
         <p>{{ object.periodicity }}</p>
         <h5>Название сообщения.</h5>
         <p>{{ object.massage }}</p>
         <h5>Статус рассылки.</h5>
         <p>
-            {% if object.attempt.exists %}
-                    {{ object.attempt.latest.attempt_status }}
-                {% else %}
-                    Нет попыток
+            {% if object.status == 'created' %}
+                <h5><span class="badge bg-success">Создана</span></h5>
+            {% elif object.status == 'launched' %}
+                <h5><span class="badge bg-info">Запущена</span></h5>
+            {% elif object.status == 'completed' %}
+                <h5><span class="badge bg-danger">Завершена</span></h5>
+            {% elif object.status == 'failed' %}
+                <h5><span class="badge bg-danger">Провалена</span></h5>
             {% endif %}
         </p>
         <h5>Клиенты рассылки:</h5>
-        <p>{% for customers in object.customers.all %} {{ customers.full_name }} <br> {% endfor %}</p>
-        {% if user.is_authenticated %}
-            {% if object.attempt.latest.attempt_status != 'Запущена' %}
-        <h4>Отправить рассылку</h4>
-        <a href="{% url 'mailing_app:start_mailing' object.pk %}">Запустить рассылку</a>
-        {% elif object.attempt.latest.attempt_status == 'Запущена' %}
-        <h4>Остановить рассылку</h4>
-        <a href="{% url 'mailing_app:stop_mailing' object.pk %}">Остановить рассылку</a>
-            {% endif %}
-        {% endif %}
+        <p>{% for customers in object.customers.all %} {{ customers.full_name }}, {% endfor %}</p>
+
+        <a href=""><a href="{% url 'mailing_app:mailing_list' %}">Назад</a>
+        <a href="{% url 'mailing_app:mailing_delete' object.pk %}">Удалить</a>
 
     </div>
 </div>

@@ -1,0 +1,1 @@
+[{"model": "mailing_app.attemptsend", "pk": 484, "fields": {"mailing": 203, "last_attempt_time": "2024-06-08T14:43:25.614Z", "attempt_status": "success", "logging": "Почта отправлена успешно пользователю Аристов Сергей Михайлович на адрес maxmit83@gmail.com", "user_attempt": 2}}]

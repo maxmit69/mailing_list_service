@@ -7,7 +7,7 @@
 
     <div class="container">
         <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-            <form method="post" enctype="multipart/form-data">
+            <form method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <button type="submit" class="btn btn-success">Создать</button>
